@@ -1,8 +1,8 @@
-//const eosjs = require('eosjs');
-//const fetch = require('node-fetch');
-//const {TextDecoder, TextEncoder} = require('text-encoding');
+//const eosjs = require("eosjs");
+//const fetch = require("node-fetch");
+//const {TextDecoder, TextEncoder} = require("text-encoding");
 
-const bot = require('./bot');
+const bot = require("./bot");
 
 //TODO: Move config data to other file
 const block_timestamp_epoch = 946684800;
@@ -31,7 +31,7 @@ main();
 
 
 
-//const rpc = new eosjs.Rpc.JsonRpc('https://api.eosrio.io', {fetch});
+//const rpc = new eosjs.Rpc.JsonRpc("https://api.eosrio.io", {fetch});
 //rpc.get_account("ge3tinjwgage").then((data) => {
 //    console.log(data.voter_info.last_vote_weight);
 //    console.log(stake2vote(data.voter_info.staked));

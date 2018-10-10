@@ -1,6 +1,6 @@
-const MongoClient = require('mongodb').MongoClient;
+const MongoClient = require("mongodb").MongoClient;
 
-const config = require('./config/config');
+const config = require("./config/config");
 
 module.exports = {
     //TODO: Check if is a valid account
@@ -19,23 +19,33 @@ module.exports = {
                     database.collection("accounts").insertOne(data).then((res) => {
                         db.close();
                         console.log("Account registered!");
-                        callback(true);
+                        if (callback && typeof(callback) === "function") {
+                            callback(true);
+                        }
                     }).catch((err) => {
                         console.log("Failed to insert document to DataBase!");
-                        callback(false);
+                        if (callback && typeof(callback) === "function") {
+                            callback(false, err);
+                        }
                     });
                 } else {
                     console.log("Account already registered!");
-                    callback(false);
+                    if (callback && typeof(callback) === "function") {
+                        callback(false);
+                    }
                 }
             
             }).catch((err) => {
                 console.log("Failed to execute query!");
-                callback(false);
+                if (callback && typeof(callback) === "function") {
+                    callback(false, err);
+                }
             });
         }).catch((err) => {
             console.log("Failed to connect to DataBase!");
-            callback(false);
+            if (callback && typeof(callback) === "function") {
+                callback(false, err);
+            }
         });
     },
     
@@ -49,30 +59,54 @@ module.exports = {
                     database.collection("accounts").deleteOne(query).then((res) => {
                         db.close();
                         console.log("Account removed!");
-                        callback(true);
+                        if (callback && typeof(callback) === "function") {
+                            callback(true);
+                        }
                     }).catch((err) => {
                         console.log("Failed to remove document from DataBase!");
-                        callback(false);
+                        if (callback && typeof(callback) === "function") {
+                            callback(false, err);
+                        }
                     });
                 } else {
                     console.log("Account not found!");
-                    callback(false);
+                    if (callback && typeof(callback) === "function") {
+                        callback(false);
+                    }
                 }
             }).catch((err) => {
                 console.log("Failed to execute query!");
-                callback(false);
+                if (callback && typeof(callback) === "function") {
+                    callback(false, err);
+                }
             });
         }).catch((err) => {
             console.log("Failed to connect to DataBase!");
-            callback(false);
+            if (callback && typeof(callback) === "function") {
+                callback(false, err);
+            }
         });
     },
     
-    check_status: function () {
+    check_status: function (callback) {
+        MongoClient.connect(config.mongodb.db_url, {useNewUrlParser: true}).then((db) => {
+            const database = db.db("vote_check");
     
-    },
-    
-    send_warning: function (chat_id) {
-        bot.sendMessage(chat_id, "Hey there! It is time for you to confirm your votes!");
+            const query = {};
+            database.collection("accounts").find(query).toArray().then((result) => {
+                if(result.length != 0) {
+                }
+            }).catch((err) => {
+                console.log("Failed to execute query!");
+                if (callback && typeof(callback) === "function") {
+                    callback(false, err);
+                }
+            });
+        }).catch((err) => {
+            console.log("Failed to connect to DataBase!");
+            if (callback && typeof(callback) === "function") {
+                callback(false, err);
+            }
+        });
     }
 };
