@@ -59,3 +59,9 @@ typings/
 
 # next.js build output
 .next
+
+# vim temporary files
+*.swp
+
+# mongodb database
+data
