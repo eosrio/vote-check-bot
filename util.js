@@ -17,14 +17,14 @@ module.exports = {
         
     },
     
-    register_account: function (username, account, value, chat_id, callback) {
+    register_account: function (username, account, limit, chat_id, callback) {
         MongoClient.connect(config.mongodb.db_url, {useNewUrlParser: true}).then((db) => {
             const database = db.db("vote_check");
     
             const query = {username: username, account: account};
             database.collection("accounts").find(query).toArray().then((result) => {
                 if(result.length == 0) {
-                    const data = {username: username, account: account, value: value, chat_id: chat_id};
+                    const data = {username: username, account: account, limit: limit, chat_id: chat_id};
                     database.collection("accounts").insertOne(data).then((res) => {
                         db.close();
                         console.log("Account registered!");

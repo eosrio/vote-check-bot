@@ -14,18 +14,20 @@ module.exports = {
         util.find_accounts((result, err) => {
             if(err === undefined) {
                 for(let i = 0; i < result.length; ++i) {
-                    //TODO: Check if it is time to send warning
                     const doc = result[i];
 
                     const rpc = new eosjs.Rpc.JsonRpc(config.bp.api_url, {fetch});
                     rpc.get_account(doc.account).then((data) => {
-                        console.log(Number(data.voter_info.last_vote_weight));
-                        console.log(util.stake2vote(data.voter_info.staked));
+                        const past_weight = Number(data.voter_info.last_vote_weight);
+                        const current_weight = util.stake2vote(data.voter_info.staked);
 
-                        send_warning(doc.chat_id);
+                        // Check if vote has decayed below limit
+                        if(past_weight * (1 + Number(doc.limit) / 100) < current_weight) {
+                            send_warning(doc.chat_id);
+                        }
                     }).catch((err) => {
                         console.log("Error requesting data from ", config.bp.api_url);
-                    });;
+                    });
                 }
             }
         });
@@ -40,10 +42,10 @@ bot.onText(/\/register/, (msg) => {
     const params = msg.text.toString().split(" ");
     if(params.length == 3) {
        const account = params[1];
-       const value = params[2];
-       //TODO: Validate account and value
+       const limit = params[2];
+       //TODO: Validate account and limit
 
-        util.register_account(msg.from.username, account, value, msg.chat.id, (result, err) => {
+        util.register_account(msg.from.username, account, limit, msg.chat.id, (result, err) => {
             if(err === undefined) {
                 if(result) {
                     bot.sendMessage(msg.chat.id, "Account registered!");
