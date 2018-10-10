@@ -6,5 +6,9 @@ module.exports =
 
     mongodb: {
         db_url: ''
+    },
+
+    bp: {
+        api_url: ""
     }
 }

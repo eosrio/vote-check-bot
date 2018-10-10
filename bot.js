@@ -17,14 +17,14 @@ module.exports = {
                     //TODO: Check if it is time to send warning
                     const doc = result[i];
 
-                    const rpc = new eosjs.Rpc.JsonRpc(config.rpc.url, {fetch});
+                    const rpc = new eosjs.Rpc.JsonRpc(config.bp.api_url, {fetch});
                     rpc.get_account(doc.account).then((data) => {
                         console.log(Number(data.voter_info.last_vote_weight));
                         console.log(util.stake2vote(data.voter_info.staked));
 
                         send_warning(doc.chat_id);
                     }).catch((err) => {
-                        console.log("Error requesting data from ", config.rpc.url);
+                        console.log("Error requesting data from ", config.bp.api_url);
                     });;
                 }
             }
