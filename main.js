@@ -1,4 +1,5 @@
 const bot = require("./bot");
+const config = require("./config/config");
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -6,7 +7,7 @@ function sleep(ms) {
 
 async function main() {
     while(true) {
-        await sleep(30000);
+        await sleep(config.sleep_time);
         bot.check_status();
     }
 }
