@@ -7,6 +7,11 @@ const stake2vote = (staked) => {
     return staked * Math.pow(2, weight);
 };
 
+const calcTime = (vote_w, limit, staked) => {
+    const time = (((Math.log((vote_w * (1 + limit / 100)) / (staked)) / Math.log(2)) * 52.0000 * seconds_per_week) + block_timestamp_epoch) * 1000;
+    return new Date(time);
+};
+
 const validate_account = (account) => {
     return /^([a-z1-5]{12})$/.test(account);
 };
@@ -18,5 +23,6 @@ const validate_threshold = (threshold) => {
 module.exports = {
     stake2vote,
     validate_account,
-    validate_threshold
+    validate_threshold,
+    calcTime
 };

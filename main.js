@@ -31,7 +31,10 @@ client.connect(function (err) {
 });
 
 function check_account(doc) {
+
     const account = doc.account;
+    console.log(account);
+
     return new Promise((resolve) => {
         rpc.get_account(account).then((data) => {
             const past_weight = Number(data.voter_info.last_vote_weight);
@@ -59,7 +62,8 @@ function check_account(doc) {
                 accounts.updateOne(query, {
                     $set: {last_weight: past_weight, alerted: false}
                 }, {upsert: false}).then(() => {
-                    bot.sendMessage(doc.chat_id, "Voting power updated, I will notify you when your voting power has decayed by " + doc.limit + "%");
+                    const futureDate = util.calcTime(past_weight, doc.limit, data.voter_info.staked);
+                    bot.sendMessage(doc.chat_id, "Voting power updated, I will notify you when your voting power has decayed by " + doc.limit + "% \n Should be around " + futureDate);
                     resolve();
                 }).catch((err) => {
                     resolve(err);
@@ -99,7 +103,8 @@ function register_account(username, account, limit, chat_id) {
                 }
             };
             accounts.updateOne(query, data, {upsert: true}).then(() => {
-                resolve();
+                const futureDate = util.calcTime(past_weight, limit, result.voter_info.staked);
+                resolve(futureDate);
             }).catch((err) => {
                 reject(err);
             });
@@ -124,9 +129,9 @@ bot.onText(/\/register/, (msg) => {
     const account = params[1];
     const limit = Number(params[2]);
     if (params.length === 3 && util.validate_account(account) && util.validate_threshold(limit)) {
-        register_account(msg.from.username, account, limit, msg.chat.id).then(() => {
+        register_account(msg.from.username, account, limit, msg.chat.id).then((futureDate) => {
             bot.sendMessage(msg.chat.id, "Account registered! I'll send you a message when " +
-                "it is time to confirm your votes");
+                "it is time to confirm your votes. Should be around " + futureDate);
         }).catch((e) => {
             console.log(e);
             bot.sendMessage(msg.chat.id, "Account already registered!");
