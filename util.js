@@ -12,11 +12,14 @@ module.exports = {
         return staked * Math.pow(2, weight);
     },
 
-    //TODO: Check if is a valid account
     validate_account: function (account) {
-        
+        return /^([a-z1-5]{5,})$/.test(account);        
     },
     
+    validate_limit: function (limit) {
+        return (limit >= 0 && limit <= 100) ? true : false;
+    },
+
     register_account: function (username, account, limit, chat_id, callback) {
         MongoClient.connect(config.mongodb.db_url, {useNewUrlParser: true}).then((db) => {
             const database = db.db("vote_check");
