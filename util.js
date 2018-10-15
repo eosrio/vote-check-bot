@@ -1,5 +1,6 @@
 const block_timestamp_epoch = 946684800;
 const seconds_per_week = 24 * 3600 * 7;
+const seconds_per_year = seconds_per_week * 52.000;
 
 const stake2vote = (staked) => {
     const now = new Date().getTime() / 1000;
@@ -7,9 +8,10 @@ const stake2vote = (staked) => {
     return staked * Math.pow(2, weight);
 };
 
-const calcTime = (vote_w, limit, staked) => {
-    const time = (((Math.log((vote_w * (1 + limit / 100)) / (staked)) / Math.log(2)) * 52.0000 * seconds_per_week) + block_timestamp_epoch) * 1000;
-    return new Date(time);
+const calcTime = (vote_w, threshold, staked) => {
+    const num_years = Math.log((vote_w * (1 + threshold / 100)) / staked) / Math.log(2);
+    const time = (num_years * seconds_per_year) + block_timestamp_epoch;
+    return new Date(time * 1000);
 };
 
 const validate_account = (account) => {
@@ -22,7 +24,7 @@ const validate_threshold = (threshold) => {
 
 module.exports = {
     stake2vote,
+    calcTime,
     validate_account,
-    validate_threshold,
-    calcTime
+    validate_threshold
 };
