@@ -33,7 +33,7 @@ client.connect(function (err) {
 function start() {
     setInterval(() => {
         main();
-    }, config.sleep_time)
+    }, config.sleep_time);
 }
 
 function main() {
@@ -62,7 +62,7 @@ function check_account(doc) {
 
             if (past_weight === doc.last_weight) {
                 if (doc.alerted === false) {
-                    if (((past_weight / current_weight) <= (1 - (doc.limit / 100)))) {
+                    if (((past_weight / current_weight) <= (1 - (doc.threshold / 100)))) {
                         accounts.updateOne(query, {
                             $set: {alerted: true}
                         }, {upsert: false}).then(() => {
@@ -81,8 +81,8 @@ function check_account(doc) {
                 accounts.updateOne(query, {
                     $set: {last_weight: past_weight, alerted: false}
                 }, {upsert: false}).then(() => {
-                    const futureDate = util.calcTime(past_weight, doc.limit, data.voter_info.staked);
-                    const message = strings.VOTING_UPDATED + doc.limit + "%\n\n" + strings.WARNING_TIME + futureDate;
+                    const futureDate = util.calcTime(past_weight, doc.threshold, data.voter_info.staked);
+                    const message = strings.VOTE_UPDATED + doc.threshold + "%\n\n" + strings.WARNING_TIME + futureDate;
                     bot.sendMessage(doc.chat_id, message);
                     resolve();
                 }).catch((err) => {
@@ -96,9 +96,7 @@ function check_account(doc) {
     });
 }
 
-function register_account(username, account, limit, chat_id) {
-    console.log('Registering account: ' + account);
-
+function register_account(username, account, threshold, chat_id) {
     return new Promise((resolve, reject) => {
         rpc.get_account(account).then((result) => {
             const past_weight = parseFloat(result['voter_info']['last_vote_weight']);
@@ -107,15 +105,15 @@ function register_account(username, account, limit, chat_id) {
                 $set: {
                     username: username,
                     account: account,
-                    limit: limit,
+                    threshold: threshold,
                     chat_id: chat_id,
                     last_weight: past_weight,
                     alerted: false
                 }
             };
-            accounts.updateOne(query, data, {upsert: true}).then(() => {
-                const futureDate = util.calcTime(past_weight, limit, result.voter_info.staked);
-                resolve(futureDate);
+            accounts.updateOne(query, data, {upsert: true}).then((res) => {
+                const futureDate = util.calcTime(past_weight, threshold, result.voter_info.staked);
+                resolve({upserted: res.upsertedCount, modified: res.modifiedCount, date: futureDate});
             }).catch((err) => {
                 reject(err);
             });
@@ -123,7 +121,6 @@ function register_account(username, account, limit, chat_id) {
             reject(err2);
         });
     });
-
 }
 
 function remove_account(username, account) {
@@ -141,12 +138,20 @@ bot.onText(/\/register/, (msg) => {
     const threshold = Number(params[2]);
 
     if (params.length === 3 && util.validate_account(account) && util.validate_threshold(threshold)) {
-        register_account(msg.from.username, account, threshold, msg.chat.id).then((futureDate) => {
-            const message = strings.ACCOUNT_REGISTERED + "\n\n" + strings.WARNING_TIME + futureDate;
+        register_account(msg.from.username, account, threshold, msg.chat.id).then((result) => {
+            let message;
+            if(result.upserted) {
+                console.log("New account registered: ", account);
+                message = strings.ACCOUNT_REGISTERED + "\n\n" + strings.WARNING_TIME + result.date;
+            } else if(result.modified) {
+                console.log("Account updated: ", account);
+                message = strings.THRESHOLD_UPDATED + "\n\n" + strings.WARNING_TIME + result.date;
+            } else {
+                message = strings.ALREADY_REGISTERED;
+            }
             bot.sendMessage(msg.chat.id, message);
         }).catch((e) => {
             console.log(e);
-            bot.sendMessage(msg.chat.id, strings.ALREADY_REGISTERED);
         });
     } else {
         const message = strings.REGISTER_ACCOUNT + "\n\n" + strings.MORE_INFORMATION;
@@ -160,10 +165,13 @@ bot.onText(/\/remove/, (msg) => {
         const account = params[1];
         remove_account(msg.from.username, account).then((result) => {
             if (result.result.n === 1) {
+                console.log("Account removed: ", account);
                 bot.sendMessage(msg.chat.id, strings.ACCOUNT_REMOVED);
             } else {
                 bot.sendMessage(msg.chat.id, strings.ACCOUNT_NOT_FOUND);
             }
+        }).catch((e) => {
+            console.log(e);
         });
     } else {
         const message = strings.REMOVE_ACCOUNT + "\n\n" + strings.MORE_INFORMATION;
