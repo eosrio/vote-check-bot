@@ -4,13 +4,13 @@ You may know that, as time passes, your voting power on the EOS platform decays 
 
 ## Getting Started
 
-These instructions will help you create and configure a Telegram Bot and also get you a copy of the project up and running on your machine.
+These instructions will help you create and configure a Telegram Bot and also get the project up and running on your machine.
 
 ### Prerequisites
 #### Telegram Bot
 First of all, you will need to create a Telegram Bot and get its token to access Telegram's HTTP API. This can be easily done by interacting with the [BotFather](https://telegram.me/BotFather)
 
-Let's start by creating the bot.
+Let's start by creating the bot. Just send the following message to BotFather:
 
 ```
 /newbot
