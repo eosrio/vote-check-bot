@@ -30,11 +30,20 @@ client.connect(function (err) {
     start();
 });
 
+let handle;
 function start() {
-    setInterval(() => {
+    handle = setInterval(() => {
         main();
     }, config.sleep_time);
 }
+
+process.on("SIGINT", () => {
+    clearInterval(handle);
+    client.close(true);
+
+    console.log("Exiting...");
+    process.exit();
+});
 
 function main() {
     check_status();
