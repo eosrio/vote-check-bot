@@ -1,6 +1,6 @@
 module.exports = {
     telegram_bot: {
-        bot_token: "625600717:AAGUXP3CBFlsWRPU7lBPsriJoNj3R_jv_pk"
+        bot_token: ""
     },
 
     mongodb: {
