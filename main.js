@@ -253,9 +253,39 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
             }
         };
 
-        bot.answerCallbackQuery(callbackQuery.id, {text: "Register Account"});
-
         bot.editMessageText("Please, select the threshold.", opts);
+        bot.answerCallbackQuery(callbackQuery.id);
+
+    } else if (data.cmd === "remove") {
+        const opts = {
+            chat_id: chat_id,
+            message_id: message_id,
+            reply_markup: {
+                inline_keyboard: [
+                    [
+                        {
+                            text: "Yes",
+                            callback_data: JSON.stringify({
+                                cmd: "confirmation",
+                                act: data.act,
+                                val: true
+                            })
+                        },
+                        {
+                            text: "No",
+                            callback_data: JSON.stringify({
+                                cmd: "confirmation",
+                                act: data.act,
+                                val: false
+                            })
+                        }
+                    ]
+                ]
+            }
+        };
+
+        bot.editMessageText("Are you sure you want to remove this account? You wont't receive alerts for it anymore", opts);
+        bot.answerCallbackQuery(callbackQuery.id);
 
     } else if (data.cmd === "threshold") {
         const opts = {
@@ -275,63 +305,31 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
                 message = strings.ALREADY_REGISTERED;
             }
 
-            bot.answerCallbackQuery(callbackQuery.id, {text: "\u2705 Account Registered!"});
-
             bot.editMessageText(message, opts);
+            bot.answerCallbackQuery(callbackQuery.id, {text: "\u2705 Account Registered!"});
         }).catch((e) => {
             console.log(e);
         });
-    }
-});
+    } else if (data.cmd === "confirmation") {
+        const opts = {
+            chat_id: chat_id,
+            message_id: message_id
+        };
 
+        if (data.val) {
+            remove_account(username, data.act).then((result) => {
+                if (result.result.n === 1) {
+                    console.log("Account removed: ", data.act);
+                    bot.editMessageText(strings.ACCOUNT_REMOVED, opts);
+                    bot.answerCallbackQuery(callbackQuery.id, {text: "\u2705 Account Removed!"});
+                } else {
+                    bot.editMessageText(strings.ACCOUNT_NOT_FOUND, opts);
+                }
+            }).catch((e) => {
+                console.log(e);
+            });
+        } else {
 
-
-
-
-
-// bot.onText(/\/register/, (msg) => {
-//     const params = msg.text.toString().split(" ");
-//     const account = params[1];
-//     const threshold = Number(params[2]);
-//
-//     if (params.length === 3 && util.validate_account(account) && util.validate_threshold(threshold)) {
-//         register_account(msg.from.username, account, threshold, msg.chat.id).then((result) => {
-//             let message;
-//             if(result.upserted) {
-//                 console.log("New account registered: ", account);
-//                 message = strings.ACCOUNT_REGISTERED + "\n\n" + strings.WARNING_TIME + result.date;
-//             } else if(result.modified) {
-//                 console.log("Account updated: ", account);
-//                 message = strings.THRESHOLD_UPDATED + "\n\n" + strings.WARNING_TIME + result.date;
-//             } else {
-//                 message = strings.ALREADY_REGISTERED;
-//             }
-//             bot.sendMessage(msg.chat.id, message);
-//         }).catch((e) => {
-//             console.log(e);
-//         });
-//     } else {
-//         const message = strings.REGISTER_ACCOUNT + "\n\n" + strings.MORE_INFORMATION;
-//         bot.sendMessage(msg.chat.id, message);
-//     }
-// });
-
-bot.onText(/\/remove/, (msg) => {
-    const params = msg.text.toString().split(" ");
-    if (params.length === 2 && util.validate_account(params[1])) {
-        const account = params[1];
-        remove_account(msg.from.username, account).then((result) => {
-            if (result.result.n === 1) {
-                console.log("Account removed: ", account);
-                bot.sendMessage(msg.chat.id, strings.ACCOUNT_REMOVED);
-            } else {
-                bot.sendMessage(msg.chat.id, strings.ACCOUNT_NOT_FOUND);
-            }
-        }).catch((e) => {
-            console.log(e);
-        });
-    } else {
-        const message = strings.REMOVE_ACCOUNT + "\n\n" + strings.MORE_INFORMATION;
-        bot.sendMessage(msg.chat.id, message);
+        }
     }
 });
