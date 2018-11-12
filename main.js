@@ -141,32 +141,180 @@ function send_warning(chat_id) {
     bot.sendMessage(chat_id, strings.WARNING_MESSAGE);
 }
 
-bot.onText(/\/register/, (msg) => {
-    const params = msg.text.toString().split(" ");
-    const account = params[1];
-    const threshold = Number(params[2]);
+bot.onText(/\/start/, (msg) => {
+    const message = strings.WELCOME + "\n\n" + strings.MORE_INFORMATION;
 
-    if (params.length === 3 && util.validate_account(account) && util.validate_threshold(threshold)) {
-        register_account(msg.from.username, account, threshold, msg.chat.id).then((result) => {
+    bot.sendMessage(msg.chat.id, message);
+});
+
+bot.onText(/\/help/, (msg) => {
+    bot.sendMessage(msg.chat.id, strings.HELP, {parse_mode : "Markdown"});
+});
+
+bot.on("message", (msg) => {
+    if(msg.text.toString().search(/(\/start|\/help)/) === -1) {
+        const account = msg.text.toString();
+        if (util.validate_account(account)) {
+            const opts = {
+                reply_markup: {
+                    inline_keyboard: [
+                        [
+                            {
+                                text: "Register Account",
+                                callback_data: JSON.stringify({
+                                    cmd: "register",
+                                    act: account
+                                })
+                            },
+                            {
+                                text: "Update Threshold",
+                                callback_data: JSON.stringify({
+                                    cmd: "update",
+                                    act: account
+                                })
+                            },
+                        ],
+                        [
+                            {
+                                text: "Set Reminder Frequency",
+                                callback_data: JSON.stringify({
+                                    cmd: "reminder",
+                                    act: account
+                                })
+                            },
+                            {
+                                text: "Remove Account",
+                                callback_data: JSON.stringify({
+                                    cmd: "remove",
+                                    act: account
+                                })
+                            }
+                        ]
+                    ]
+                }
+            };
+
+            bot.sendMessage(msg.chat.id, "Now you can manage your EOS account. Use one of the options bellow to continue:", opts);
+        } else {
+            bot.sendMessage(msg.chat.id, "Please send a valid account name.");
+            // bot.sendMessage(msg.chat.id, strings.MORE_INFORMATION);
+        }
+    }
+});
+
+bot.on("callback_query", function onCallbackQuery(callbackQuery) {
+    const data = JSON.parse(callbackQuery.data);
+
+    const chat_id = callbackQuery.message.chat.id;
+    const message_id = callbackQuery.message.message_id;
+    const username = callbackQuery.from.username;
+
+    if (data.cmd === "register") {
+        const opts = {
+            chat_id: chat_id,
+            message_id: message_id,
+            reply_markup: {
+                inline_keyboard: [
+                    [
+                        {
+                            text: "5%",
+                            callback_data: JSON.stringify({
+                                cmd: "threshold",
+                                act: data.act,
+                                val: 5
+                            })
+                        },
+                        {
+                            text: "10%",
+                            callback_data: JSON.stringify({
+                                cmd: "threshold",
+                                act: data.act,
+                                val: 10
+                            })
+                        },
+                        {
+                            text: "15%",
+                            callback_data: JSON.stringify({
+                                cmd: "threshold",
+                                act: data.act,
+                                val: 15
+                            })
+                        },
+                        {
+                            text: "20%",
+                            callback_data: JSON.stringify({
+                                cmd: "threshold",
+                                act: data.act,
+                                val: 20
+                            })
+                        },
+                    ]
+                ]
+            }
+        };
+
+        bot.answerCallbackQuery(callbackQuery.id, {text: "Register Account"});
+
+        bot.editMessageText("Please, select the threshold.", opts);
+
+    } else if (data.cmd === "threshold") {
+        const opts = {
+            chat_id: chat_id,
+            message_id: message_id
+        };
+
+        register_account(username, data.act, data.val, chat_id).then((result) => {
             let message;
             if(result.upserted) {
-                console.log("New account registered: ", account);
+                console.log("New account registered: ", data.act);
                 message = strings.ACCOUNT_REGISTERED + "\n\n" + strings.WARNING_TIME + result.date;
             } else if(result.modified) {
-                console.log("Account updated: ", account);
+                console.log("Account updated: ", data.act);
                 message = strings.THRESHOLD_UPDATED + "\n\n" + strings.WARNING_TIME + result.date;
             } else {
                 message = strings.ALREADY_REGISTERED;
             }
-            bot.sendMessage(msg.chat.id, message);
+
+            bot.answerCallbackQuery(callbackQuery.id, {text: "\u2705 Account Registered!"});
+
+            bot.editMessageText(message, opts);
         }).catch((e) => {
             console.log(e);
         });
-    } else {
-        const message = strings.REGISTER_ACCOUNT + "\n\n" + strings.MORE_INFORMATION;
-        bot.sendMessage(msg.chat.id, message);
     }
 });
+
+
+
+
+
+
+// bot.onText(/\/register/, (msg) => {
+//     const params = msg.text.toString().split(" ");
+//     const account = params[1];
+//     const threshold = Number(params[2]);
+//
+//     if (params.length === 3 && util.validate_account(account) && util.validate_threshold(threshold)) {
+//         register_account(msg.from.username, account, threshold, msg.chat.id).then((result) => {
+//             let message;
+//             if(result.upserted) {
+//                 console.log("New account registered: ", account);
+//                 message = strings.ACCOUNT_REGISTERED + "\n\n" + strings.WARNING_TIME + result.date;
+//             } else if(result.modified) {
+//                 console.log("Account updated: ", account);
+//                 message = strings.THRESHOLD_UPDATED + "\n\n" + strings.WARNING_TIME + result.date;
+//             } else {
+//                 message = strings.ALREADY_REGISTERED;
+//             }
+//             bot.sendMessage(msg.chat.id, message);
+//         }).catch((e) => {
+//             console.log(e);
+//         });
+//     } else {
+//         const message = strings.REGISTER_ACCOUNT + "\n\n" + strings.MORE_INFORMATION;
+//         bot.sendMessage(msg.chat.id, message);
+//     }
+// });
 
 bot.onText(/\/remove/, (msg) => {
     const params = msg.text.toString().split(" ");
@@ -185,20 +333,5 @@ bot.onText(/\/remove/, (msg) => {
     } else {
         const message = strings.REMOVE_ACCOUNT + "\n\n" + strings.MORE_INFORMATION;
         bot.sendMessage(msg.chat.id, message);
-    }
-});
-
-bot.onText(/\/start/, (msg) => {
-    const message = strings.WELCOME + "\n\n" + strings.MORE_INFORMATION;
-    bot.sendMessage(msg.chat.id, message);
-});
-
-bot.onText(/\/help/, (msg) => {
-    bot.sendMessage(msg.chat.id, strings.HELP, {parse_mode : "Markdown"});
-});
-
-bot.on('message', (msg) => {
-    if(msg.text.toString().search(/(\/register|\/remove|\/start|\/help)/) === -1) {
-        bot.sendMessage(msg.chat.id, strings.MORE_INFORMATION);
     }
 });
