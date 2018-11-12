@@ -142,9 +142,7 @@ function send_warning(chat_id) {
 }
 
 bot.onText(/\/start/, (msg) => {
-    const message = strings.WELCOME + "\n\n" + strings.MORE_INFORMATION;
-
-    bot.sendMessage(msg.chat.id, message);
+    bot.sendMessage(msg.chat.id, strings.WELCOME + "\n\n" + strings.START + "\n\n" + strings.MORE_INFORMATION);
 });
 
 bot.onText(/\/help/, (msg) => {
@@ -167,7 +165,7 @@ bot.on("message", (msg) => {
                                 })
                             },
                             {
-                                text: "Update Threshold",
+                                text: "Update Decay Threshold",
                                 callback_data: JSON.stringify({
                                     cmd: "update",
                                     act: account
@@ -176,9 +174,9 @@ bot.on("message", (msg) => {
                         ],
                         [
                             {
-                                text: "Set Reminder Frequency",
+                                text: "Set Alert Frequency",
                                 callback_data: JSON.stringify({
-                                    cmd: "reminder",
+                                    cmd: "alert",
                                     act: account
                                 })
                             },
@@ -193,11 +191,9 @@ bot.on("message", (msg) => {
                     ]
                 }
             };
-
-            bot.sendMessage(msg.chat.id, "Now you can manage your EOS account. Use one of the options bellow to continue:", opts);
+            bot.sendMessage(msg.chat.id, strings.SELECT_ACTIONS, opts);
         } else {
-            bot.sendMessage(msg.chat.id, "Please send a valid account name.");
-            // bot.sendMessage(msg.chat.id, strings.MORE_INFORMATION);
+            bot.sendMessage(msg.chat.id, strings.INVALID_ACCOUNT + "\n\n" + strings.MORE_INFORMATION);
         }
     }
 });
@@ -248,14 +244,47 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
                                 val: 20
                             })
                         },
+                        {
+                            text: "25%",
+                            callback_data: JSON.stringify({
+                                cmd: "threshold",
+                                act: data.act,
+                                val: 25
+                            })
+                        },
+                        {
+                            text: "30%",
+                            callback_data: JSON.stringify({
+                                cmd: "threshold",
+                                act: data.act,
+                                val: 30
+                            })
+                        },
+                        {
+                            text: "40%",
+                            callback_data: JSON.stringify({
+                                cmd: "threshold",
+                                act: data.act,
+                                val: 40
+                            })
+                        },
+                        {
+                            text: "50%",
+                            callback_data: JSON.stringify({
+                                cmd: "threshold",
+                                act: data.act,
+                                val: 50
+                            })
+                        }
                     ]
                 ]
             }
         };
 
-        bot.editMessageText("Please, select the threshold.", opts);
+        bot.editMessageText(strings.SELECT_THRESHOLD, opts);
         bot.answerCallbackQuery(callbackQuery.id);
-
+    } else if (data.cmd === "update") {
+    } else if (data.cmd === "alert") {
     } else if (data.cmd === "remove") {
         const opts = {
             chat_id: chat_id,
@@ -284,9 +313,8 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
             }
         };
 
-        bot.editMessageText("Are you sure you want to remove this account? You wont't receive alerts for it anymore", opts);
+        bot.editMessageText(strings.REMOVE_CONFIRMATION, opts);
         bot.answerCallbackQuery(callbackQuery.id);
-
     } else if (data.cmd === "threshold") {
         const opts = {
             chat_id: chat_id,
@@ -294,19 +322,18 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
         };
 
         register_account(username, data.act, data.val, chat_id).then((result) => {
-            let message;
             if(result.upserted) {
                 console.log("New account registered: ", data.act);
-                message = strings.ACCOUNT_REGISTERED + "\n\n" + strings.WARNING_TIME + result.date;
+                bot.editMessageText(strings.SEND_ALERT + "\n\n" + strings.WARNING_TIME + result.date, opts);
+                bot.answerCallbackQuery(callbackQuery.id, {text: strings.ACCOUNT_REGISTERED_ALERT});
             } else if(result.modified) {
                 console.log("Account updated: ", data.act);
-                message = strings.THRESHOLD_UPDATED + "\n\n" + strings.WARNING_TIME + result.date;
+                bot.editMessageText(strings.SEND_ALERT + "\n\n" + strings.WARNING_TIME + result.date, opts);
+                bot.answerCallbackQuery(callbackQuery.id, {text: strings.ACCOUNT_UPDATED_ALERT});
             } else {
-                message = strings.ALREADY_REGISTERED;
+                bot.editMessageText(strings.ALREADY_REGISTERED, opts);
+                bot.answerCallbackQuery(callbackQuery.id, {text: strings.ALREADY_REGISTERED_ALERT});
             }
-
-            bot.editMessageText(message, opts);
-            bot.answerCallbackQuery(callbackQuery.id, {text: "\u2705 Account Registered!"});
         }).catch((e) => {
             console.log(e);
         });
@@ -321,15 +348,16 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
                 if (result.result.n === 1) {
                     console.log("Account removed: ", data.act);
                     bot.editMessageText(strings.ACCOUNT_REMOVED, opts);
-                    bot.answerCallbackQuery(callbackQuery.id, {text: "\u2705 Account Removed!"});
+                    bot.answerCallbackQuery(callbackQuery.id, {text: strings.ACCOUNT_REMOVED_ALERT});
                 } else {
                     bot.editMessageText(strings.ACCOUNT_NOT_FOUND, opts);
+                    bot.answerCallbackQuery(callbackQuery.id, {text: strings.ACCOUNT_NOT_FOUND_ALERT});
                 }
             }).catch((e) => {
                 console.log(e);
             });
         } else {
-
+            bot.editMessageText(strings.ACCOUNT_NOT_REMOVED, opts);
         }
     }
 });
