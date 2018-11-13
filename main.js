@@ -68,12 +68,13 @@ function check_account(doc) {
             const past_weight = Number(data.voter_info.last_vote_weight);
             const current_weight = util.stake2vote(data.voter_info.staked);
             const query = {username: doc.username, account: account};
+            const current_date = new Date();
 
             if (past_weight === doc.last_weight) {
                 if (doc.alerted === false) {
                     if (((past_weight / current_weight) <= (1 - (doc.threshold / 100)))) {
                         accounts.updateOne(query, {
-                            $set: {alerted: true}
+                            $set: {alerted: true, last_alert: current_date.getTime()}
                         }, {upsert: false}).then(() => {
                             send_warning(doc.chat_id);
                             resolve();
@@ -84,7 +85,18 @@ function check_account(doc) {
                         resolve();
                     }
                 } else {
-                    resolve();
+                    if (doc.alert_freq !== 0 && current_date.getTime() > doc.last_alert + doc.alert_freq) {
+                        accounts.updateOne(query, {
+                            $set: {last_alert: current_date.getTime()}
+                        }, {upsert: false}).then(() => {
+                            send_warning(doc.chat_id);
+                            resolve();
+                        }).catch((err) => {
+                            resolve(err);
+                        });
+                    } else {
+                        resolve();
+                    }
                 }
             } else {
                 accounts.updateOne(query, {
@@ -117,7 +129,9 @@ function register_account(username, account, threshold, chat_id) {
                     threshold: threshold,
                     chat_id: chat_id,
                     last_weight: past_weight,
-                    alerted: false
+                    alerted: false,
+                    alert_freq: 0,
+                    last_alert: 0
                 }
             };
             accounts.updateOne(query, data, {upsert: true}).then((res) => {
@@ -135,6 +149,24 @@ function register_account(username, account, threshold, chat_id) {
 function remove_account(username, account) {
     const query = {username: username, account: account};
     return accounts.deleteOne(query, {justOne: true});
+}
+
+function update_frequency(username, account, frequency) {
+    return new Promise((resolve, reject) => {
+        rpc.get_account(account).then(() => {
+            const query = {username: username, account: account};
+            const data = {
+                $set: {alert_freq: frequency}
+            };
+            accounts.updateOne(query, data).then((res) => {
+                resolve(res.modifiedCount);
+            }).catch((err) => {
+                reject(err);
+            });
+        }).catch((err2) => {
+            reject(err2);
+        });
+    });
 }
 
 function send_warning(chat_id) {
@@ -205,7 +237,7 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
     const message_id = callbackQuery.message.message_id;
     const username = callbackQuery.from.username;
 
-    if (data.cmd === "register") {
+    if (data.cmd === "register" || data.cmd === "update") {
         const opts = {
             chat_id: chat_id,
             message_id: message_id,
@@ -283,8 +315,52 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
 
         bot.editMessageText(strings.SELECT_THRESHOLD, opts);
         bot.answerCallbackQuery(callbackQuery.id);
-    } else if (data.cmd === "update") {
     } else if (data.cmd === "alert") {
+        const opts = {
+            chat_id: chat_id,
+            message_id: message_id,
+            reply_markup: {
+                inline_keyboard: [
+                    [
+                        {
+                            text: "Once",
+                            callback_data: JSON.stringify({
+                                cmd: "frequency",
+                                act: data.act,
+                                val: 0
+                            })
+                        },
+                        {
+                            text: "Once Per Day",
+                            callback_data: JSON.stringify({
+                                cmd: "frequency",
+                                act: data.act,
+                                val: 1
+                            })
+                        },
+                        {
+                            text: "Once Per Week",
+                            callback_data: JSON.stringify({
+                                cmd: "threshold",
+                                act: data.act,
+                                val: 7
+                            })
+                        },
+                        {
+                            text: "Once Per Month",
+                            callback_data: JSON.stringify({
+                                cmd: "threshold",
+                                act: data.act,
+                                val: 30
+                            })
+                        }
+                    ]
+                ]
+            }
+        };
+
+        bot.editMessageText(strings.SELECT_FREQUENCY, opts);
+        bot.answerCallbackQuery(callbackQuery.id);
     } else if (data.cmd === "remove") {
         const opts = {
             chat_id: chat_id,
@@ -335,8 +411,41 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
                 bot.answerCallbackQuery(callbackQuery.id, {text: strings.ALREADY_REGISTERED_ALERT});
             }
         }).catch((e) => {
+            bot.editMessageText(strings.ERROR, opts);
+            bot.answerCallbackQuery(callbackQuery.id, strings.ERROR_ALERT);
             console.log(e);
         });
+    } else if (data.cmd === "frequency") {
+        const opts = {
+            chat_id: chat_id,
+            message_id: message_id
+        };
+
+        update_frequency(username, data.act, util.calcFreq(data.val)).then((result) => {
+            if (result) {
+                console.log("Alert frequency updated for account: ", data.act);
+                let message;
+                if (data.val === 0) {
+                    message = strings.ALERT_FREQUENCY_UPDATED + "only once."
+                } else if (data.val === 1) {
+                    message = strings.ALERT_FREQUENCY_UPDATED + "every day."
+                } else if (data.val === 7) {
+                    message = strings.ALERT_FREQUENCY_UPDATED + "every week."
+                } else if (data.val ===30) {
+                    message = strings.ALERT_FREQUENCY_UPDATED + "every month."
+                }
+                bot.editMessageText(message, opts);
+                bot.answerCallbackQuery(callbackQuery.id, strings.ALERT_FREQUENCY_UPDATED_ALERT);
+            } else {
+                bot.editMessageText(strings.ACCOUNT_NOT_FOUND, opts);
+                bot.answerCallbackQuery(callbackQuery.id, strings.ACCOUNT_NOT_FOUND_ALERT);
+            }
+        }).catch((e) => {
+            bot.editMessageText(strings.ERROR, opts);
+            bot.answerCallbackQuery(callbackQuery.id, strings.ERROR_ALERT);
+            console.log(e);
+        });
+
     } else if (data.cmd === "confirmation") {
         const opts = {
             chat_id: chat_id,
@@ -354,6 +463,8 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
                     bot.answerCallbackQuery(callbackQuery.id, {text: strings.ACCOUNT_NOT_FOUND_ALERT});
                 }
             }).catch((e) => {
+                bot.editMessageText(strings.ERROR, opts);
+                bot.answerCallbackQuery(callbackQuery.id, strings.ERROR_ALERT);
                 console.log(e);
             });
         } else {
