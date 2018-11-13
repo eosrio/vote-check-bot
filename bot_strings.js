@@ -29,17 +29,17 @@ module.exports = {
     VOTE_UPDATED: "Voting power updated, I will notify you when your voting power has decayed by ",
     HELP: "I'm here to help you keep track of your votes on the EOS platform. Send me a message with your EOS " +
         "account and you'll be able to do the following actions:\n\n" +
-        "*Register Account*\n\n" +
-        "    This option allows you to register an account so you can receive an alert from me when your voting " +
-        "power has decayed the specified amount.\n\n" +
-        "    Note that you can register as many accounts as you want.\n\n" +
-        "*Update Threshold*\n\n" +
-        "    This option allows you to update the decay threshold you specified during the registration of " +
-        "an account. The decay threshold represents the amount of voting power you accept to lose.\n\n." +
-        "*Set Alert Frequency*\n\n" +
-        "    This option allows you to set the frequency in which you want to receive alerts from me. By default " +
-        "you will receive an alert only once." +
-        "*Remove Account*\n\n" +
-        "    This options allows you to remove an account you have previously registered. Once you remove it, you " +
+        "*Register Account:*\n\n" +
+        "This option allows you to register an account so you can receive an alert from me when your voting " +
+        "power has decayed below a certain amount.\n\n" +
+        "Note that you can register as many accounts as you want.\n\n" +
+        "*Update Threshold:*\n\n" +
+        "This option allows you to update the decay threshold you specified during the registration of " +
+        "an account.\n\nThe decay threshold represents the amount of voting power you accept to lose.\n\n" +
+        "*Set Alert Frequency:*\n\n" +
+        "This option allows you to set the frequency in which you want to receive alerts from me. By default " +
+        "you will receive an alert only once.\n\n" +
+        "*Remove Account:*\n\n" +
+        "This options allows you to remove an account you have previously registered. Once you remove it, you " +
         "won't receive any more alerts for this account."
 };
