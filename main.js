@@ -7,6 +7,7 @@ const fetch = require("node-fetch");
 const rpc = new eosjs.Rpc.JsonRpc(config.bp.api_url, {fetch});
 
 // Telegram
+process.env["NTBA_FIX_319"] = 1; // Fix for "Promise cancellation has been deprecated" message.
 const TelegramBot = require("node-telegram-bot-api");
 const bot = new TelegramBot(config.telegram_bot.bot_token, {polling: true});
 
@@ -245,6 +246,22 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
                 inline_keyboard: [
                     [
                         {
+                            text: "1%",
+                            callback_data: JSON.stringify({
+                                cmd: "threshold",
+                                act: data.act,
+                                val: 1
+                            })
+                        },
+                        {
+                            text: "2.5%",
+                            callback_data: JSON.stringify({
+                                cmd: "threshold",
+                                act: data.act,
+                                val: 2.5
+                            })
+                        },
+                        {
                             text: "5%",
                             callback_data: JSON.stringify({
                                 cmd: "threshold",
@@ -269,43 +286,11 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
                             })
                         },
                         {
-                            text: "20%",
+                            text: ">= 20%",
                             callback_data: JSON.stringify({
                                 cmd: "threshold",
                                 act: data.act,
                                 val: 20
-                            })
-                        },
-                        {
-                            text: "25%",
-                            callback_data: JSON.stringify({
-                                cmd: "threshold",
-                                act: data.act,
-                                val: 25
-                            })
-                        },
-                        {
-                            text: "30%",
-                            callback_data: JSON.stringify({
-                                cmd: "threshold",
-                                act: data.act,
-                                val: 30
-                            })
-                        },
-                        {
-                            text: "40%",
-                            callback_data: JSON.stringify({
-                                cmd: "threshold",
-                                act: data.act,
-                                val: 40
-                            })
-                        },
-                        {
-                            text: "50%",
-                            callback_data: JSON.stringify({
-                                cmd: "threshold",
-                                act: data.act,
-                                val: 50
                             })
                         }
                     ]
