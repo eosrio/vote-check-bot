@@ -412,7 +412,7 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
             }
         }).catch((e) => {
             bot.editMessageText(strings.ERROR, opts);
-            bot.answerCallbackQuery(callbackQuery.id, strings.ERROR_ALERT);
+            bot.answerCallbackQuery(callbackQuery.id, {text: strings.ERROR_ALERT});
             console.log(e);
         });
     } else if (data.cmd === "frequency") {
@@ -435,14 +435,14 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
                     message = strings.ALERT_FREQUENCY_UPDATED + "every month."
                 }
                 bot.editMessageText(message, opts);
-                bot.answerCallbackQuery(callbackQuery.id, strings.ALERT_FREQUENCY_UPDATED_ALERT);
+                bot.answerCallbackQuery(callbackQuery.id, {text: strings.ALERT_FREQUENCY_UPDATED_ALERT});
             } else {
                 bot.editMessageText(strings.ACCOUNT_NOT_FOUND, opts);
-                bot.answerCallbackQuery(callbackQuery.id, strings.ACCOUNT_NOT_FOUND_ALERT);
+                bot.answerCallbackQuery(callbackQuery.id, {text: strings.ACCOUNT_NOT_FOUND_ALERT});
             }
         }).catch((e) => {
             bot.editMessageText(strings.ERROR, opts);
-            bot.answerCallbackQuery(callbackQuery.id, strings.ERROR_ALERT);
+            bot.answerCallbackQuery(callbackQuery.id, {text: strings.ERROR_ALERT});
             console.log(e);
         });
 
@@ -464,7 +464,7 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
                 }
             }).catch((e) => {
                 bot.editMessageText(strings.ERROR, opts);
-                bot.answerCallbackQuery(callbackQuery.id, strings.ERROR_ALERT);
+                bot.answerCallbackQuery(callbackQuery.id, {text: strings.ERROR_ALERT});
                 console.log(e);
             });
         } else {
