@@ -74,7 +74,7 @@ function check_account(doc) {
                 if (doc.alerted === false) {
                     if (((past_weight / current_weight) <= (1 - (doc.threshold / 100)))) {
                         accounts.updateOne(query, {
-                            $set: {alerted: true, last_alert: current_date.getTime()}
+                            $set: {alerted: true, last_alert: current_date.getTime() / 1000}
                         }, {upsert: false}).then(() => {
                             send_warning(doc.chat_id);
                             resolve();
@@ -85,9 +85,9 @@ function check_account(doc) {
                         resolve();
                     }
                 } else {
-                    if (doc.alert_freq !== 0 && current_date.getTime() > doc.last_alert + doc.alert_freq) {
+                    if (doc.alert_freq !== 0 && (current_date.getTime() / 1000) > (doc.last_alert + doc.alert_freq)) {
                         accounts.updateOne(query, {
-                            $set: {last_alert: current_date.getTime()}
+                            $set: {last_alert: current_date.getTime() / 1000}
                         }, {upsert: false}).then(() => {
                             send_warning(doc.chat_id);
                             resolve();
