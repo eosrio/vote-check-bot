@@ -326,7 +326,7 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
                         {
                             text: "Once Per Week",
                             callback_data: JSON.stringify({
-                                cmd: "threshold",
+                                cmd: "frequency",
                                 act: data.act,
                                 val: 7
                             })
@@ -334,7 +334,7 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
                         {
                             text: "Once Per Month",
                             callback_data: JSON.stringify({
-                                cmd: "threshold",
+                                cmd: "frequency",
                                 act: data.act,
                                 val: 30
                             })
@@ -410,7 +410,7 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
 
         update_frequency(username, data.act, util.calcFreq(data.val)).then((result) => {
             if (result) {
-                console.log("Alert frequency updated for account: ", data.act);
+                console.log("Alert frequency updated: ", data.act);
                 let message;
                 if (data.val === 0) {
                     message = strings.ALERT_FREQUENCY_UPDATED + "only once."
