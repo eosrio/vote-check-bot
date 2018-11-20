@@ -1,7 +1,8 @@
 module.exports = {
-    WELCOME: "Did you know that as time passes your voting power on the EOS platform decays and " +
-        "that you should update it once in a while?\n\nI'm here to help you keep track of your votes, " +
-        "all you need to do is register your EOS account and I'll let you know when it is time to confirm them.",
+    WELCOME: "Did you know that as time passes, your voting power on the EOS platform decays? Therefore, " +
+        "it's important to periodically re-vote your tokens to ensure they carry their full strength.\n\n" +
+        "I'm here to help you keep track of your voting power. All you need to do is register your EOS account and " +
+        "I'll let you know when it is time to re-vote them.",
     START: "Please, send me a message with your EOS account so we can proceed.",
     MORE_INFORMATION: "If you need more information type /help.",
     SELECT_ACTIONS: "Ok, what do you want to do with this account?\n\n Select one of the options below to continue.",
