@@ -15,6 +15,7 @@ const bot = new TelegramBot(config.telegram_bot.bot_token, {polling: true});
 const assert = require('assert');
 const util = require("./util");
 const strings = require("./bot_strings");
+const buttons = require("./bot_buttons");
 
 // Mongodb
 const MongoClient = require("mongodb").MongoClient;
@@ -188,40 +189,7 @@ bot.on("message", (msg) => {
         if (util.validate_account(account)) {
             const opts = {
                 reply_markup: {
-                    inline_keyboard: [
-                        [
-                            {
-                                text: "Register Account",
-                                callback_data: JSON.stringify({
-                                    cmd: "register",
-                                    act: account
-                                })
-                            },
-                            {
-                                text: "Update Decay Threshold",
-                                callback_data: JSON.stringify({
-                                    cmd: "update",
-                                    act: account
-                                })
-                            },
-                        ],
-                        [
-                            {
-                                text: "Set Alert Frequency",
-                                callback_data: JSON.stringify({
-                                    cmd: "alert",
-                                    act: account
-                                })
-                            },
-                            {
-                                text: "Remove Account",
-                                callback_data: JSON.stringify({
-                                    cmd: "remove",
-                                    act: account
-                                })
-                            }
-                        ]
-                    ]
+                    inline_keyboard: buttons.init_buttons(account)
                 }
             };
             bot.sendMessage(msg.chat.id, strings.SELECT_ACTIONS, opts);
@@ -243,61 +211,9 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
             chat_id: chat_id,
             message_id: message_id,
             reply_markup: {
-                inline_keyboard: [
-                    [
-                        {
-                            text: "1%",
-                            callback_data: JSON.stringify({
-                                cmd: "threshold",
-                                act: data.act,
-                                val: 1
-                            })
-                        },
-                        {
-                            text: "2.5%",
-                            callback_data: JSON.stringify({
-                                cmd: "threshold",
-                                act: data.act,
-                                val: 2.5
-                            })
-                        },
-                        {
-                            text: "5%",
-                            callback_data: JSON.stringify({
-                                cmd: "threshold",
-                                act: data.act,
-                                val: 5
-                            })
-                        },
-                        {
-                            text: "10%",
-                            callback_data: JSON.stringify({
-                                cmd: "threshold",
-                                act: data.act,
-                                val: 10
-                            })
-                        },
-                        {
-                            text: "15%",
-                            callback_data: JSON.stringify({
-                                cmd: "threshold",
-                                act: data.act,
-                                val: 15
-                            })
-                        },
-                        {
-                            text: ">= 20%",
-                            callback_data: JSON.stringify({
-                                cmd: "threshold",
-                                act: data.act,
-                                val: 20
-                            })
-                        }
-                    ]
-                ]
+                inline_keyboard: buttons.threshold_buttons(data.act)
             }
         };
-
         bot.editMessageText(strings.SELECT_THRESHOLD, opts);
         bot.answerCallbackQuery(callbackQuery.id);
     } else if (data.cmd === "alert") {
@@ -305,45 +221,9 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
             chat_id: chat_id,
             message_id: message_id,
             reply_markup: {
-                inline_keyboard: [
-                    [
-                        {
-                            text: "Once",
-                            callback_data: JSON.stringify({
-                                cmd: "frequency",
-                                act: data.act,
-                                val: 0
-                            })
-                        },
-                        {
-                            text: "Once Per Day",
-                            callback_data: JSON.stringify({
-                                cmd: "frequency",
-                                act: data.act,
-                                val: 1
-                            })
-                        },
-                        {
-                            text: "Once Per Week",
-                            callback_data: JSON.stringify({
-                                cmd: "frequency",
-                                act: data.act,
-                                val: 7
-                            })
-                        },
-                        {
-                            text: "Once Per Month",
-                            callback_data: JSON.stringify({
-                                cmd: "frequency",
-                                act: data.act,
-                                val: 30
-                            })
-                        }
-                    ]
-                ]
+                inline_keyboard: buttons.frequency_buttons(data.act)
             }
         };
-
         bot.editMessageText(strings.SELECT_FREQUENCY, opts);
         bot.answerCallbackQuery(callbackQuery.id);
     } else if (data.cmd === "remove") {
@@ -351,29 +231,9 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
             chat_id: chat_id,
             message_id: message_id,
             reply_markup: {
-                inline_keyboard: [
-                    [
-                        {
-                            text: "Yes",
-                            callback_data: JSON.stringify({
-                                cmd: "confirmation",
-                                act: data.act,
-                                val: true
-                            })
-                        },
-                        {
-                            text: "No",
-                            callback_data: JSON.stringify({
-                                cmd: "confirmation",
-                                act: data.act,
-                                val: false
-                            })
-                        }
-                    ]
-                ]
+                inline_keyboard: buttons.question_buttons(data.act)
             }
         };
-
         bot.editMessageText(strings.REMOVE_CONFIRMATION, opts);
         bot.answerCallbackQuery(callbackQuery.id);
     } else if (data.cmd === "threshold") {
