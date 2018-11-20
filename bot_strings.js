@@ -11,6 +11,7 @@ module.exports = {
     REMOVE_CONFIRMATION: "Are you sure you want to remove this account? You wont't receive alerts for it anymore.",
     SEND_ALERT: "Done! I'll send you an alert when it is time to confirm your votes.",
     WARNING_TIME: "It should happen on ",
+    FURTHER_CUSTOMIZATION: "Please re-enter your account name at any time if you need to customize it further.",
     ACCOUNT_REMOVED: "Your account was removed!",
     ACCOUNT_NOT_FOUND: "Account not found! Have you registered it already?",
     ALREADY_REGISTERED: "Nothing changed! This account is already registered with the same decay threshold selected.",

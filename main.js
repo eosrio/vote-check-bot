@@ -383,16 +383,18 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
         };
 
         register_account(username, data.act, data.val, chat_id).then((result) => {
+            const message = strings.SEND_ALERT + "\n\n" + strings.WARNING_TIME + result.date + "\n\n" +
+                strings.FURTHER_CUSTOMIZATION;
             if(result.upserted) {
                 console.log("New account registered: ", data.act);
-                bot.editMessageText(strings.SEND_ALERT + "\n\n" + strings.WARNING_TIME + result.date, opts);
+                bot.editMessageText(message, opts);
                 bot.answerCallbackQuery(callbackQuery.id, {text: strings.ACCOUNT_REGISTERED_ALERT});
             } else if(result.modified) {
                 console.log("Account updated: ", data.act);
-                bot.editMessageText(strings.SEND_ALERT + "\n\n" + strings.WARNING_TIME + result.date, opts);
+                bot.editMessageText(message, opts);
                 bot.answerCallbackQuery(callbackQuery.id, {text: strings.ACCOUNT_UPDATED_ALERT});
             } else {
-                bot.editMessageText(strings.ALREADY_REGISTERED, opts);
+                bot.editMessageText(strings.ALREADY_REGISTERED + "\n\n" + strings.FURTHER_CUSTOMIZATION, opts);
                 bot.answerCallbackQuery(callbackQuery.id, {text: strings.ALREADY_REGISTERED_ALERT});
             }
         }).catch((e) => {
@@ -419,10 +421,10 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
                 } else if (data.val ===30) {
                     message = strings.ALERT_FREQUENCY_UPDATED + "every month."
                 }
-                bot.editMessageText(message, opts);
+                bot.editMessageText(message + "\n\n" + strings.FURTHER_CUSTOMIZATION, opts);
                 bot.answerCallbackQuery(callbackQuery.id, {text: strings.ALERT_FREQUENCY_UPDATED_ALERT});
             } else {
-                bot.editMessageText(strings.ACCOUNT_NOT_FOUND, opts);
+                bot.editMessageText(strings.ACCOUNT_NOT_FOUND + "\n\n" + strings.FURTHER_CUSTOMIZATION, opts);
                 bot.answerCallbackQuery(callbackQuery.id, {text: strings.ACCOUNT_NOT_FOUND_ALERT});
             }
         }).catch((e) => {
@@ -441,10 +443,10 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
             remove_account(username, data.act).then((result) => {
                 if (result.result.n === 1) {
                     console.log("Account removed: ", data.act);
-                    bot.editMessageText(strings.ACCOUNT_REMOVED, opts);
+                    bot.editMessageText(strings.ACCOUNT_REMOVED + "\n\n" + strings.FURTHER_CUSTOMIZATION, opts);
                     bot.answerCallbackQuery(callbackQuery.id, {text: strings.ACCOUNT_REMOVED_ALERT});
                 } else {
-                    bot.editMessageText(strings.ACCOUNT_NOT_FOUND, opts);
+                    bot.editMessageText(strings.ACCOUNT_NOT_FOUND + "\n\n" + strings.FURTHER_CUSTOMIZATION, opts);
                     bot.answerCallbackQuery(callbackQuery.id, {text: strings.ACCOUNT_NOT_FOUND_ALERT});
                 }
             }).catch((e) => {
@@ -453,7 +455,7 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
                 console.log(e);
             });
         } else {
-            bot.editMessageText(strings.ACCOUNT_NOT_REMOVED, opts);
+            bot.editMessageText(strings.ACCOUNT_NOT_REMOVED + "\n\n" + strings.FURTHER_CUSTOMIZATION, opts);
         }
     }
 });
