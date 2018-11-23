@@ -4,7 +4,7 @@ const Promise = require("bluebird");
 // EOSJS
 const eosjs = require("eosjs");
 const fetch = require("node-fetch");
-const rpc = new eosjs.Rpc.JsonRpc(config.bp.api_url, {fetch});
+const rpc = new eosjs.JsonRpc(config.bp.api_url, {fetch});
 
 // Telegram
 process.env["NTBA_FIX_319"] = 1; // Fix for "Promise cancellation has been deprecated" message.
