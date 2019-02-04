@@ -7,7 +7,7 @@ module.exports = {
     MORE_INFORMATION: "If you need more information type /help.",
     SELECT_ACTIONS: "Ok, what do you want to do with this account?\n\n Select one of the options below to continue.",
     SELECT_THRESHOLD: "Please, select the decay threshold for the voting power of your account.",
-    SELECT_FREQUENCY: "Please, select the frequency you wish to receive alerts.",
+    SELECT_FREQUENCY: "Please, select the frequency you wish to receive alerts until you refresh your votes.",
     REMOVE_CONFIRMATION: "Are you sure you want to remove this account? You wont't receive alerts for it anymore.",
     SEND_ALERT: "Done! I'll send you an alert when it is time to refresh your votes.",
     WARNING_TIME: "It should happen on ",
