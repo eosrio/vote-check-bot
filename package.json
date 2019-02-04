@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "eosjs": "^20.0.0-beta1",
+    "eosjs": "^20.0.0-beta3",
     "mongodb": "^3.1.7",
     "node-fetch": "^2.2.0",
     "node-telegram-bot-api": "^0.30.0",
