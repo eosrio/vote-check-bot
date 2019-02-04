@@ -2,9 +2,10 @@ const config = require("./config/config");
 const Promise = require("bluebird");
 
 // EOSJS
-const eosjs = require("eosjs");
+const {Api, JsonRpc, RpcError} = require("eosjs");
+
 const fetch = require("node-fetch");
-const rpc = new eosjs.JsonRpc(config.bp.api_url, {fetch});
+const rpc = new JsonRpc(config.bp.api_url, {fetch});
 
 // Telegram
 process.env["NTBA_FIX_319"] = 1; // Fix for "Promise cancellation has been deprecated" message.
@@ -123,25 +124,31 @@ function register_account(username, account, threshold, chat_id) {
     return new Promise((resolve, reject) => {
         rpc.get_account(account).then((result) => {
             const past_weight = parseFloat(result['voter_info']['last_vote_weight']);
-            const query = {username: username, account: account};
-            const data = {
-                $set: {
-                    username: username,
-                    account: account,
-                    threshold: threshold,
-                    chat_id: chat_id,
-                    last_weight: past_weight,
-                    alerted: false,
-                    alert_freq: 0,
-                    last_alert: 0
-                }
-            };
-            accounts.updateOne(query, data, {upsert: true}).then((res) => {
-                const futureDate = util.calcTime(past_weight, threshold, result.voter_info.staked);
-                resolve({upserted: res.upsertedCount, modified: res.modifiedCount, date: futureDate});
-            }).catch((err) => {
-                reject(err);
-            });
+            const producers = result['voter_info']['producers'];
+            if (producers.length > 0) {
+                const query = {username: username, account: account};
+                const data = {
+                    $set: {
+                        username: username,
+                        account: account,
+                        threshold: threshold,
+                        chat_id: chat_id,
+                        last_weight: past_weight,
+                        alerted: false,
+                        alert_freq: 0,
+                        last_alert: 0
+                    }
+                };
+                accounts.updateOne(query, data, {upsert: true}).then((res) => {
+                    const futureDate = util.calcTime(past_weight, threshold, result.voter_info.staked);
+                    resolve({num_votes: producers.length, upserted: res.upsertedCount, modified: res.modifiedCount,
+                        date: futureDate});
+                }).catch((err) => {
+                    reject(err);
+                });
+            } else {
+                resolve({num_votes: producers.length});
+            }
         }).catch((err2) => {
             reject(err2);
         });
@@ -245,7 +252,10 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
         register_account(username, data.act, data.val, chat_id).then((result) => {
             const message = strings.SEND_ALERT + "\n\n" + strings.WARNING_TIME + result.date + "\n\n" +
                 strings.FURTHER_CUSTOMIZATION;
-            if(result.upserted) {
+            if(result.num_votes == 0) {
+                bot.editMessageText(strings.HAS_NO_VOTES, opts);
+                bot.answerCallbackQuery(callbackQuery.id, {text: strings.NOT_REGISTERED_ALERT});
+            } else if(result.upserted) {
                 console.log("New account registered: ", data.act);
                 bot.editMessageText(message, opts);
                 bot.answerCallbackQuery(callbackQuery.id, {text: strings.ACCOUNT_REGISTERED_ALERT});
