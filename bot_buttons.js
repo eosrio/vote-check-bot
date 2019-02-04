@@ -102,7 +102,15 @@ const frequency_buttons = (account) => {
                 })
             },
             {
-                text: "Once Per Day",
+                text: "Twice a Day",
+                callback_data: JSON.stringify({
+                    cmd: "frequency",
+                    act: account,
+                    val: 0.5
+                })
+            },
+            {
+                text: "Once a Day",
                 callback_data: JSON.stringify({
                     cmd: "frequency",
                     act: account,
@@ -110,19 +118,19 @@ const frequency_buttons = (account) => {
                 })
             },
             {
-                text: "Once Per Week",
+                text: "Twice a Week",
+                callback_data: JSON.stringify({
+                    cmd: "frequency",
+                    act: account,
+                    val: 4.5
+                })
+            },
+            {
+                text: "Once a Week",
                 callback_data: JSON.stringify({
                     cmd: "frequency",
                     act: account,
                     val: 7
-                })
-            },
-            {
-                text: "Once Per Month",
-                callback_data: JSON.stringify({
-                    cmd: "frequency",
-                    act: account,
-                    val: 30
                 })
             }
         ]

@@ -288,12 +288,14 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
                 let message;
                 if (data.val === 0) {
                     message = strings.ALERT_FREQUENCY_UPDATED + "only once."
+                } else if (data.val === 0.5) {
+                    message = strings.ALERT_FREQUENCY_UPDATED + "twice a day."
                 } else if (data.val === 1) {
                     message = strings.ALERT_FREQUENCY_UPDATED + "every day."
+                } else if (data.val === 4.5) {
+                    message = strings.ALERT_FREQUENCY_UPDATED + "twice a week."
                 } else if (data.val === 7) {
                     message = strings.ALERT_FREQUENCY_UPDATED + "every week."
-                } else if (data.val ===30) {
-                    message = strings.ALERT_FREQUENCY_UPDATED + "every month."
                 }
                 bot.editMessageText(message + "\n\n" + strings.FURTHER_CUSTOMIZATION, opts);
                 bot.answerCallbackQuery(callbackQuery.id, {text: strings.ALERT_FREQUENCY_UPDATED_ALERT});
