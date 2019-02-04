@@ -123,31 +123,35 @@ function check_account(doc) {
 function register_account(username, account, threshold, chat_id) {
     return new Promise((resolve, reject) => {
         rpc.get_account(account).then((result) => {
-            const past_weight = parseFloat(result['voter_info']['last_vote_weight']);
-            const producers = result['voter_info']['producers'];
-            if (producers.length > 0) {
-                const query = {username: username, account: account};
-                const data = {
-                    $set: {
-                        username: username,
-                        account: account,
-                        threshold: threshold,
-                        chat_id: chat_id,
-                        last_weight: past_weight,
-                        alerted: false,
-                        alert_freq: 0,
-                        last_alert: 0
-                    }
-                };
-                accounts.updateOne(query, data, {upsert: true}).then((res) => {
-                    const futureDate = util.calcTime(past_weight, threshold, result.voter_info.staked);
-                    resolve({num_votes: producers.length, upserted: res.upsertedCount, modified: res.modifiedCount,
-                        date: futureDate});
-                }).catch((err) => {
-                    reject(err);
-                });
+            if (result['voter_info'] == null) {
+                resolve({num_votes: 0});
             } else {
-                resolve({num_votes: producers.length});
+                const past_weight = parseFloat(result['voter_info']['last_vote_weight']);
+                const producers = result['voter_info']['producers'];
+                if (producers.length > 0) {
+                    const query = {username: username, account: account};
+                    const data = {
+                        $set: {
+                            username: username,
+                            account: account,
+                            threshold: threshold,
+                            chat_id: chat_id,
+                            last_weight: past_weight,
+                            alerted: false,
+                            alert_freq: 0,
+                            last_alert: 0
+                        }
+                    };
+                    accounts.updateOne(query, data, {upsert: true}).then((res) => {
+                        const futureDate = util.calcTime(past_weight, threshold, result.voter_info.staked);
+                        resolve({num_votes: producers.length, upserted: res.upsertedCount, modified: res.modifiedCount,
+                            date: futureDate});
+                    }).catch((err) => {
+                        reject(err);
+                    });
+                } else {
+                    resolve({num_votes: producers.length});
+                }
             }
         }).catch((err2) => {
             reject(err2);

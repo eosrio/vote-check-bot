@@ -19,7 +19,7 @@ module.exports = {
     ACCOUNT_NOT_REMOVED: "Great, your account was not removed!",
     INVALID_ACCOUNT: "This is not a valid account. A valid EOS account has 12 characters, with letters from a to z " +
         "and numbers from 1 to 5. Please, try again.",
-    HAS_NO_VOTES: "This account has no votes. It can't be registered!",
+    HAS_NO_VOTES: "This account has no votes yet! Please, vote in your favorite BPs so you can register it!",
     ERROR: "An error occurred! Are you sure you typed the correct account name?",
     ACCOUNT_REGISTERED_ALERT: "\u2705 Account Registered!",
     ACCOUNT_REGISTERED_ALERT: "\u2705 Not Registered!",
