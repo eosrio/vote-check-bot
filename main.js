@@ -88,7 +88,8 @@ function check_account(doc) {
                         resolve();
                     }
                 } else {
-                    if (doc.alert_freq !== 0 && (current_date.getTime() / 1000) > (doc.last_alert + doc.alert_freq)) {
+                    if (doc.alert_freq !== 0 &&
+                        (current_date.getTime() / 1000) > (doc.last_alert + doc.alert_freq)) {
                         accounts.updateOne(query, {
                             $set: {last_alert: current_date.getTime() / 1000}
                         }, {upsert: false}).then(() => {
@@ -105,8 +106,10 @@ function check_account(doc) {
                 accounts.updateOne(query, {
                     $set: {last_weight: past_weight, alerted: false}
                 }, {upsert: false}).then(() => {
-                    const futureDate = util.calcTime(past_weight, doc.threshold, data.voter_info.staked);
-                    const message = strings.VOTE_UPDATED + doc.threshold + "%\n\n" + strings.WARNING_TIME + futureDate;
+                    const futureDate = util.calcTime(past_weight, doc.threshold,
+                        data.voter_info.staked);
+                    const message = strings.VOTE_UPDATED + doc.threshold + "%\n\n" +
+                        strings.WARNING_TIME + futureDate;
                     bot.sendMessage(doc.chat_id, message);
                     resolve();
                 }).catch((err) => {
@@ -143,9 +146,10 @@ function register_account(username, account, threshold, chat_id) {
                         }
                     };
                     accounts.updateOne(query, data, {upsert: true}).then((res) => {
-                        const futureDate = util.calcTime(past_weight, threshold, result.voter_info.staked);
-                        resolve({num_votes: producers.length, upserted: res.upsertedCount, modified: res.modifiedCount,
-                            date: futureDate});
+                        const futureDate = util.calcTime(past_weight, threshold,
+                            result.voter_info.staked);
+                        resolve({num_votes: producers.length, upserted: res.upsertedCount,
+                            modified: res.modifiedCount, date: futureDate});
                     }).catch((err) => {
                         reject(err);
                     });
@@ -187,7 +191,8 @@ function send_warning(chat_id) {
 }
 
 bot.onText(/\/start/, (msg) => {
-    bot.sendMessage(msg.chat.id, strings.WELCOME + "\n\n" + strings.START + "\n\n" + strings.MORE_INFORMATION);
+    bot.sendMessage(msg.chat.id, strings.WELCOME + "\n\n" + strings.START + "\n\n" +
+        strings.MORE_INFORMATION);
 });
 
 bot.onText(/\/help/, (msg) => {
@@ -205,7 +210,8 @@ bot.on("message", (msg) => {
             };
             bot.sendMessage(msg.chat.id, strings.SELECT_ACTIONS, opts);
         } else {
-            bot.sendMessage(msg.chat.id, strings.INVALID_ACCOUNT + "\n\n" + strings.MORE_INFORMATION);
+            bot.sendMessage(msg.chat.id, strings.INVALID_ACCOUNT + "\n\n" +
+                strings.MORE_INFORMATION);
         }
     }
 });
@@ -254,8 +260,8 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
         };
 
         register_account(username, data.act, data.val, chat_id).then((result) => {
-            const message = strings.SEND_ALERT + "\n\n" + strings.WARNING_TIME + result.date + "\n\n" +
-                strings.FURTHER_CUSTOMIZATION;
+            const message = strings.SEND_ALERT + "\n\n" + strings.WARNING_TIME + result.date +
+                "\n\n" + strings.FURTHER_CUSTOMIZATION;
             if(result.num_votes == 0) {
                 bot.editMessageText(strings.HAS_NO_VOTES, opts);
                 bot.answerCallbackQuery(callbackQuery.id, {text: strings.NOT_REGISTERED_ALERT});
@@ -268,7 +274,8 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
                 bot.editMessageText(message, opts);
                 bot.answerCallbackQuery(callbackQuery.id, {text: strings.ACCOUNT_UPDATED_ALERT});
             } else {
-                bot.editMessageText(strings.ALREADY_REGISTERED + "\n\n" + strings.FURTHER_CUSTOMIZATION, opts);
+                bot.editMessageText(strings.ALREADY_REGISTERED + "\n\n" +
+                    strings.FURTHER_CUSTOMIZATION, opts);
                 bot.answerCallbackQuery(callbackQuery.id, {text: strings.ALREADY_REGISTERED_ALERT});
             }
         }).catch((e) => {
@@ -298,10 +305,12 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
                     message = strings.ALERT_FREQUENCY_UPDATED + "every week."
                 }
                 bot.editMessageText(message + "\n\n" + strings.FURTHER_CUSTOMIZATION, opts);
-                bot.answerCallbackQuery(callbackQuery.id, {text: strings.ALERT_FREQUENCY_UPDATED_ALERT});
+                bot.answerCallbackQuery(callbackQuery.id,
+                    {text: strings.ALERT_FREQUENCY_UPDATED_ALERT});
             } else {
-                bot.editMessageText(strings.ACCOUNT_NOT_FOUND + "\n\n" + strings.FURTHER_CUSTOMIZATION, opts);
-                bot.answerCallbackQuery(callbackQuery.id, {text: strings.ACCOUNT_NOT_FOUND_ALERT});
+                bot.editMessageText(strings.ALERT_FREQUENCY_NOT_UPDATED + "\n\n" +
+                    strings.FURTHER_CUSTOMIZATION, opts);
+                bot.answerCallbackQuery(callbackQuery.id, {text: strings.NOTHING_CHANGED_ALERT});
             }
         }).catch((e) => {
             bot.editMessageText(strings.ERROR, opts);
@@ -319,11 +328,15 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
             remove_account(username, data.act).then((result) => {
                 if (result.result.n === 1) {
                     console.log("Account removed: ", data.act);
-                    bot.editMessageText(strings.ACCOUNT_REMOVED + "\n\n" + strings.FURTHER_CUSTOMIZATION, opts);
-                    bot.answerCallbackQuery(callbackQuery.id, {text: strings.ACCOUNT_REMOVED_ALERT});
+                    bot.editMessageText(strings.ACCOUNT_REMOVED + "\n\n" +
+                        strings.FURTHER_CUSTOMIZATION, opts);
+                    bot.answerCallbackQuery(callbackQuery.id,
+                        {text: strings.ACCOUNT_REMOVED_ALERT});
                 } else {
-                    bot.editMessageText(strings.ACCOUNT_NOT_FOUND + "\n\n" + strings.FURTHER_CUSTOMIZATION, opts);
-                    bot.answerCallbackQuery(callbackQuery.id, {text: strings.ACCOUNT_NOT_FOUND_ALERT});
+                    bot.editMessageText(strings.ACCOUNT_NOT_FOUND + "\n\n" +
+                        strings.FURTHER_CUSTOMIZATION, opts);
+                    bot.answerCallbackQuery(callbackQuery.id,
+                        {text: strings.ACCOUNT_NOT_FOUND_ALERT});
                 }
             }).catch((e) => {
                 bot.editMessageText(strings.ERROR, opts);
@@ -331,7 +344,8 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
                 console.log(e);
             });
         } else {
-            bot.editMessageText(strings.ACCOUNT_NOT_REMOVED + "\n\n" + strings.FURTHER_CUSTOMIZATION, opts);
+            bot.editMessageText(strings.ACCOUNT_NOT_REMOVED + "\n\n" +
+                strings.FURTHER_CUSTOMIZATION, opts);
         }
     }
 });

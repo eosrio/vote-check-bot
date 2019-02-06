@@ -16,6 +16,7 @@ module.exports = {
     ACCOUNT_NOT_FOUND: "Account not found! Have you registered it already?",
     ALREADY_REGISTERED: "Nothing changed! This account is already registered with the same decay threshold selected.",
     ALERT_FREQUENCY_UPDATED: "Alert frequency updated! When the time comes, you will receive an alert message ",
+    ALERT_FREQUENCY_NOT_UPDATED: "Nothing changed! This account is already registered with the same alert frequency selected.",
     ACCOUNT_NOT_REMOVED: "Great, your account was not removed!",
     INVALID_ACCOUNT: "This is not a valid account. A valid EOS account has 12 characters, with letters from a to z " +
         "and numbers from 1 to 5. Please, try again.",
@@ -28,6 +29,7 @@ module.exports = {
     ALERT_FREQUENCY_UPDATED_ALERT: "\u2705 Alert Frequency Updated!",
     ACCOUNT_REMOVED_ALERT: "\u2705 Account removed!",
     ACCOUNT_NOT_FOUND_ALERT: "\u274C Account not found!",
+    NOTHING_CHANGED_ALERT: "\u2705 Nothing changed!",
     ERROR_ALERT: "\u274C Error!",
     WARNING_MESSAGE: "Hey there! It is time to confirm your votes!",
     VOTE_UPDATED: "Voting power updated, I will notify you when your voting power has decayed by ",
