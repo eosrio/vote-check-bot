@@ -201,7 +201,7 @@ bot.onText(/\/help/, (msg) => {
 
 bot.on("message", (msg) => {
     if(msg.text.toString().search(/(\/start|\/help)/) === -1) {
-        const account = msg.text.toString();
+        const account = msg.text.toString().toLowerCase();
         if (util.validate_account(account)) {
             const opts = {
                 reply_markup: {
