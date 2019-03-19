@@ -108,7 +108,9 @@ const frequency_buttons = (account) => {
                     act: account,
                     val: 0.5
                 })
-            },
+            }
+        ],
+        [
             {
                 text: "Once a Day",
                 callback_data: JSON.stringify({
